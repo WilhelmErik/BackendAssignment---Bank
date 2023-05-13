@@ -13,14 +13,16 @@ export async function mainConnect() {
     //need to change which database and/or collection i connect to
 
     //The database name of my choice
-    const db = client.db("registry");
+    const db = client.db("bank");
 
     // The collection of choice, will contain both users and bank details, or seperate them into different collections
-    const userCollection = db.collection("members");
+    
+    // const userCollection = db.collection("members");
+
     const accountCollection = db.collection("accounts");
 
     // Will return the collection connection, which can be used by relevant controllers
-    return memberCollection;
+    return db
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
   }
@@ -29,7 +31,7 @@ export async function mainConnect() {
 // collection structure
 //account
 // {
-//    accountNumber: 
+//    accountNumber:
 //    accountName:
 //    balance:
 //    userID (reference):
@@ -37,15 +39,13 @@ export async function mainConnect() {
 
 //user
 // {
-//    _id: user id 
+//    _id: user id
 //    username: name
 //    password (hashed):
 // }
 
-
-
 // Accounts Collection:
-// - _id  
+// - _id
 // - name
 // - balance
 // - userId (reference to Users _id)
@@ -54,5 +54,3 @@ export async function mainConnect() {
 // - _id
 // - username
 // - password (hashed)
-
-

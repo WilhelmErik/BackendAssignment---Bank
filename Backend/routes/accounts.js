@@ -1,8 +1,5 @@
-
-
-accountRouter.get('/', /* ... */); 
-accountRouter.post('/', /* ... */); 
-accountRouter.get('/:id', /* ... */); 
-accountRouter.patch('/:id', /* ... */); 
-accountRouter.delete('/:id', /* ... */); 
-
+accountRouter.get("/" /* ... */); // get all accounts
+accountRouter.post("/" /* ... */); // create account
+accountRouter.get("/:id" /* ... */); // get a specific account
+accountRouter.patch("/:id" /* ... */); //update a specific account
+accountRouter.delete("/:id" /* ... */); // delete a specific account
