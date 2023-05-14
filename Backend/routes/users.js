@@ -21,6 +21,29 @@ userRouter.get("/", (req, res) => {
   res.send("Heya");
 });
 
+userRouter.post("/login", async (req, res) => {
+  let { name } = req.body;
+  console.log(req.body.name);
+
+  let user = await usersCollection.findOne({ name });
+
+  console.log(req.body.password);
+  if (!user) {
+    return res.status(400).json({ message: "There is no such user" });
+  }
+  console.log(user.password);
+
+  if (user.password === req.body.password) {
+    res.status(200).json({ message: "Hey there, you exist", user });
+    console.log("user has logged in");
+    console.log(user, "a user");
+  }
+  //  else if (user.password !== req.body.password) {
+  //   res.json({ message: "Something went wrong" });
+  //   console.log("smth went wrong");
+  // }
+});
+
 userRouter.post("/", async (req, res) => {
   let { name } = req.body;
   console.log(name, " Not object");
@@ -36,7 +59,8 @@ userRouter.post("/", async (req, res) => {
       name: req.body.name,
       password: req.body.password,
     });
-    res.status(201).json(newUser );
+    res.status(201).json(newUser);
+    console.log("user has been created");
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

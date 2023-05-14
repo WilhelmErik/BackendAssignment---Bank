@@ -5,9 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <script src="../src/app.js" defer type="module"></script>
   </head>
   <body>
-    Hello There
+    <!-- Hello There
 
     <div id="authentication">
       <form action="http://localhost:3000/users" method="post">
@@ -41,6 +42,50 @@
 
         <button>Try Create</button>
       </form>
+    </div> -->
+
+    <div id="auth-page">
+      <div id="entry-form">
+        <div class="buttons">
+          <button class="Login" id="display-login">Login</button>
+          <button class="Register" id="display-register">Register</button>
+        </div>
+        <div class="inputs">
+          <div class="Name" id="username-div">
+            <label for="username-input">Name</label>
+            <input
+              type="text"
+              class="Name"
+              name="name"
+              id="username-input"
+              placeholder="name"
+            />
+          </div>
+          <div class="Password" id="password-div">
+            <label for="password-input">Password</label>
+            <input
+              type="password"
+              class="Password"
+              name="password"
+              id="password-input"
+            />
+          </div>
+          <div class="Mail" id="mail-div" style="display: none">
+            <label for="Mail"> Mail</label>
+            <input type="text" name="Mail" class="Mail" id="mail-input" />
+          </div>
+        </div>
+
+        <button class="login-register" id="submit-login">Login</button>
+
+        <button
+          class="login-register"
+          id="submit-register"
+          style="display: none"
+        >
+          Register
+        </button>
+      </div>
     </div>
   </body>
 </html>
