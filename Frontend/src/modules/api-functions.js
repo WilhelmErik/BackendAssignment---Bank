@@ -62,6 +62,7 @@ document
     });
     //  let data= res.json()
     //  console.log(data)
+    if (res.ok) isLoggedIn();
     console.log(res);
     let data = await res.json();
     console.log(data);
@@ -117,17 +118,54 @@ function renderAccounts(accounts) {
     accountDiv.append(edit);
     accountDiv.append(remove);
 
-    remove.addEventListener("click", async (e) => {
-      console.log(e.target.tagName);
-      const res = await fetch(baseAPI + "accounts/" + account._id, {
-        method: "DELETE",
-        headers: header,
-      });
-      console.log(res);
-      let data = await res.json();
-      console.log(data);
-    });
+    remove.classList.add("remove-button");
+    edit.classList.add("edit-button");
+
+    // remove.addEventListener("click", async (e) => {
+    //   console.log(e.target.tagName);
+    //   const res = await fetch(baseAPI + "accounts/" + account._id, {
+    //     method: "DELETE",
+    //     headers: header,
+    //   });
+    //   console.log(res);
+    //   let data = await res.json();
+    //   console.log(data);
+    // });
+
+    accountButtonListener(accountDiv, account);
   });
 }
 
 document.getElementById("account-div");
+
+async function accountButtonListener(accountDiv, account) {
+  const removeButton = accountDiv.querySelector(".remove-button");
+  const editButton = accountDiv.querySelector(".edit-button");
+
+  removeButton.addEventListener("click", async (e) => {
+    const res = await fetch(baseAPI + "accounts/" + account._id, {
+      method: "DELETE",
+      headers: header,
+    });
+
+    console.log(res, "result");
+    if (res.ok) {
+      accountDiv.remove();
+    }
+    let data = await res.json();
+    console.log(data);
+  });
+  //   editButton.addEventListener("click", async (e) => {
+  //     const res = await fetch(baseAPI + "accounts/" + account._id, {
+  //       method: "PATCH",
+  //       headers: header,
+  //       body: JSON.stringify({
+  //         balance:
+  //       })
+  //     });
+
+  //     console.log(res);
+  //     let data = await res.json();
+  //     console.log(data);
+  //   });
+}
