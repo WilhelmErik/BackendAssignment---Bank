@@ -1,6 +1,8 @@
 import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
 import crypto from "crypto"; // from googling i learnt of nodes inbuilt crypto method to generate UUID
+import bcrypt from "bcrypt"; // package for encryption/decryption
+import jsonwebtoken from "jsonwebtoken";
 
 const userRouter = express.Router();
 userRouter.use(express.json());
@@ -32,8 +34,9 @@ userRouter.post("/login", async (req, res) => {
     return res.status(400).json({ message: "There is no such user" });
   }
   console.log(user.password);
-
-  if (user.password === req.body.password) {
+  console.log(user.password);
+  let passMatch = await checkPassword(req.body.password, user.password);
+  if (passMatch) {
     res.status(200).json({ message: "Hey there, you exist", user });
     console.log("user has logged in");
     console.log(user, "a user");
@@ -46,6 +49,7 @@ userRouter.post("/login", async (req, res) => {
   // }
 });
 
+//Creating account
 userRouter.post("/", async (req, res) => {
   let { username } = req.body;
   console.log(username);
@@ -58,18 +62,45 @@ userRouter.post("/", async (req, res) => {
   }
 
   try {
+    let hashedPass = await hashPassword(req.body.password);
+    console.log(hashedPass);
     let newUser = await usersCollection.insertOne({
       _id: crypto.randomUUID(),
       username: req.body.username,
-      password: req.body.password,
+      password: hashedPass,
     });
     let user = await usersCollection.findOne({ username });
-    res.status(201).json({ newUser , user});
+    res.status(201).json({ newUser, user });
     console.log("user has been created");
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+const saltRounds = 10; //The higher the saltRounds value, the more time the hashing algorithm takes
+
+//function to hash a pawwsord using bcryupt
+async function hashPassword(password) {
+  const salt = await bcrypt.genSalt(saltRounds);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  return hashedPassword;
+}
+
+async function checkPassword(password, hashedPassword) {
+  const ifMatch = await bcrypt.compare(password, hashedPassword);
+  return ifMatch;
+}
+
+function generateJWT(user) {
+  const userData = {
+    id: user._id,
+    username: user.username,
+  };
+
+  const token = jwt.sign(userData, "Will change for .env", { expiresIn: "2h" });
+
+  return token;
+}
 
 export default userRouter;
 
