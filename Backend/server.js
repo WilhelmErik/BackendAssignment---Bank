@@ -12,6 +12,11 @@ app.use(express.static("public"));
 const port = 3000;
 
 import userRouter from "./routes/users.js";
+import accountRouter from "./routes/accounts.js";
 app.use("/users", userRouter);
+app.use("/accounts", accountRouter);
 
-app.listen(port, () => console.log(crypto.randomUUID()));
+app.listen(port, () => {
+  console.log(crypto.randomUUID());
+  console.log(crypto.randomInt(1000, 10000));
+});

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="../src/app.js" defer type="module"></script>
+    <link rel="stylesheet" href="../src/styles/style.css" />
   </head>
   <body>
     <!-- Hello There
@@ -56,7 +57,7 @@
             <input
               type="text"
               class="Name"
-              name="name"
+              name="username"
               id="username-input"
               placeholder="name"
             />
@@ -89,3 +90,35 @@
     </div>
   </body>
 </html>
+
+<main></main>
+<div id="main" style="display: none">
+  <header>
+    <button id="logout">Log out</button>
+  </header>
+  <div id="user-accounts">
+    <h2>Your accounts</h2>
+  </div>
+  <div id="add-account">
+    <button id="add-account">Add an account</button>
+  </div>
+</div>
+
+<form action="" id="account-form" style="display: none">
+  <input
+    type="text"
+    placeholder="account name"
+    name="accountname"
+    id="accountname"
+    required
+  />
+  <input
+    type="number"
+    placeholder="amount"
+    name="balance"
+    id="balance"
+    required
+  />
+
+  <button id="submit-account" type="submit">Create acc</button>
+</form>

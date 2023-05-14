@@ -10,7 +10,7 @@ let db, usersCollection;
 (async () => {
   db = await mainConnect();
   usersCollection = db.collection("users");
-  console.log("collection established");
+  console.log("users collection established");
 })();
 
 //I need one route for creating a user, and a route for logging in, or now, May add a route to delete account
@@ -22,10 +22,10 @@ userRouter.get("/", (req, res) => {
 });
 
 userRouter.post("/login", async (req, res) => {
-  let { name } = req.body;
+  let { username } = req.body;
   console.log(req.body.name);
 
-  let user = await usersCollection.findOne({ name });
+  let user = await usersCollection.findOne({ username });
 
   console.log(req.body.password);
   if (!user) {
@@ -37,6 +37,8 @@ userRouter.post("/login", async (req, res) => {
     res.status(200).json({ message: "Hey there, you exist", user });
     console.log("user has logged in");
     console.log(user, "a user");
+  } else {
+    res.status(404).json({ message: "Invalid passowrd", user });
   }
   //  else if (user.password !== req.body.password) {
   //   res.json({ message: "Something went wrong" });
@@ -45,21 +47,24 @@ userRouter.post("/login", async (req, res) => {
 });
 
 userRouter.post("/", async (req, res) => {
-  let { name } = req.body;
-  console.log(name, " Not object");
-  console.log({ name }, " Object");
-  let user = await usersCollection.findOne({ name });
+  let { username } = req.body;
+  console.log(username);
+  let user = await usersCollection.findOne({ username });
+  console.log(user, "should be null");
   if (user) {
-    return res.status(400).json({ message: "Username already exists" });
+    return res
+      .status(400)
+      .json({ message: "Username already exists", something: username });
   }
 
   try {
     let newUser = await usersCollection.insertOne({
       _id: crypto.randomUUID(),
-      name: req.body.name,
+      username: req.body.username,
       password: req.body.password,
     });
-    res.status(201).json(newUser);
+    let user = await usersCollection.findOne({ username });
+    res.status(201).json({ newUser , user});
     console.log("user has been created");
   } catch (err) {
     res.status(500).json({ message: err.message });
