@@ -104,8 +104,7 @@ function generateJWT(user) {
 
 export default userRouter;
 
-// let usersCollection;
-// let accountsCollection;
+
 
 // May implement this middleware later
 // Middleware to check database connection
