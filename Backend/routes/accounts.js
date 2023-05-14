@@ -40,6 +40,15 @@ accountRouter.get("/:id", async (req, res) => {
 }); // get a specific account
 
 accountRouter.patch("/:id" /* ... */); //update a specific account
-accountRouter.delete("/:id" /* ... */); // delete a specific account
+
+accountRouter.delete("/:id", (req, res) => {
+  let _id = req.params.id;
+  try {
+    const deleted = accountsCollection.deleteOne({ _id });
+    res.status(200).json({ message: "deleted "});
+  } catch (err) {
+    res.status(500).json({ message: err });
+  }
+}); // delete a specific account
 
 export default accountRouter;

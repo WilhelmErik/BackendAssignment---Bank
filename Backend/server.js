@@ -18,5 +18,5 @@ app.use("/accounts", accountRouter);
 
 app.listen(port, () => {
   console.log(crypto.randomUUID());
-  console.log(crypto.randomInt(1000, 10000));
+  console.log(crypto.randomInt(9999, 999999));
 });

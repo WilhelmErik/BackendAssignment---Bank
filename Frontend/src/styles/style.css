@@ -1,5 +1,5 @@
 body{
-    color:red;
+    color:rgb(43, 39, 39);
     margin: auto;
 display: flex;
     border: black solid 2px;
@@ -20,4 +20,10 @@ body div {
     flex-direction: column;
     margin: 20px;
 
+}
+.account-div{
+    border: rgba(0, 0, 0, 0.412) solid 4px;
+    border-radius: 12px;
+    margin: 1rem;
+    padding: 1rem;
 }

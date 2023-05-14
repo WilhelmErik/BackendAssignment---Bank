@@ -97,9 +97,37 @@ async function getAccounts(id) {
   renderAccounts(data);
 }
 function renderAccounts(accounts) {
+  let userAccounts = document.getElementById("user-accounts");
+  userAccounts.innerHTML = "";
   accounts.forEach((account) => {
     console.log(account);
-    document.createElement("div");
-    
+    console.log(account.balance);
+    let accountDiv = document.createElement("div");
+    userAccounts.append(accountDiv);
+    accountDiv.classList.add("account-div");
+    // accountDiv.dataset.id = account._id;
+    accountDiv.innerHTML = ` 
+    <p>Account: ${account.accountname}</p>
+    <p>Balance: ${account.balance}$</p>
+    `;
+    let edit = document.createElement("button");
+    let remove = document.createElement("button");
+    edit.innerText = "Edit";
+    remove.innerText = "Remove";
+    accountDiv.append(edit);
+    accountDiv.append(remove);
+
+    remove.addEventListener("click", async (e) => {
+      console.log(e.target.tagName);
+      const res = await fetch(baseAPI + "accounts/" + account._id, {
+        method: "DELETE",
+        headers: header,
+      });
+      console.log(res);
+      let data = await res.json();
+      console.log(data);
+    });
   });
 }
+
+document.getElementById("account-div");
