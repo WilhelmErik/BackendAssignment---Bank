@@ -3,6 +3,8 @@ import { MongoClient, ObjectId } from "mongodb";
 import crypto from "crypto"; // from googling i learnt of nodes inbuilt crypto method to generate UUID
 import bcrypt from "bcrypt"; // package for encryption/decryption
 import jsonwebtoken from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 const userRouter = express.Router();
 userRouter.use(express.json());
@@ -49,7 +51,7 @@ userRouter.post("/login", async (req, res) => {
   // }
 });
 
-//Creating account
+//Creating user
 userRouter.post("/", async (req, res) => {
   let { username } = req.body;
   console.log(username);
@@ -82,6 +84,7 @@ const saltRounds = 10; //The higher the saltRounds value, the more time the hash
 //function to hash a pawwsord using bcryupt
 async function hashPassword(password) {
   const salt = await bcrypt.genSalt(saltRounds);
+  console.log(salt, " This is salt");
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
 }
@@ -90,6 +93,11 @@ async function checkPassword(password, hashedPassword) {
   const ifMatch = await bcrypt.compare(password, hashedPassword);
   return ifMatch;
 }
+
+
+//_______________________
+
+// a jwt middleware, may export
 
 function generateJWT(user) {
   const userData = {
@@ -102,9 +110,18 @@ function generateJWT(user) {
   return token;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 export default userRouter;
-
-
 
 // May implement this middleware later
 // Middleware to check database connection

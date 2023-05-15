@@ -19,4 +19,5 @@ app.use("/accounts", accountRouter);
 app.listen(port, () => {
   console.log(crypto.randomUUID());
   console.log(crypto.randomInt(9999, 999999));
+  console.log(crypto.randomBytes(32).toString("hex")); // using this to generate my secret keys, might be dumb but yea, all i could think of for now
 });
