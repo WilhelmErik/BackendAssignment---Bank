@@ -119,6 +119,44 @@ function generateRefreshToken(user) {
   return jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
 }
 
+// Function to validate token
+function verifyAccessToken(req, res, next) {
+  const authHead = req.headers.auth;
+  if (authHead) {
+    const token = authHead.split(" "[1]);
+    try {
+      const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      req.user = user;
+      next();
+    } catch (err) {
+      return res.status(403);
+    }
+  } else {
+    return res.status(401);
+  }
+}
+
+function verifyRefreshToken(req, res, next) {
+  const authHead = req.headers.auth;
+  if (authHead) {
+    const token = authHead.split(" "[1]);
+    try {
+      const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+      req.user = user;
+      next();
+    } catch (err) {
+      return res.status(403);
+    }
+  } else {
+    return res.status(401);
+  }
+}
+
+app.get("/token", verifyRefreshToken, (req, res) => {
+  const JWT = generateAccessToken(req.user);
+  res.json({ JWT: JWT });
+});
+
 app.post("/token", (req, res) => {
   const refreshToken = req.body.token;
   if (refreshToken == null) return res.sendStatus(401);
