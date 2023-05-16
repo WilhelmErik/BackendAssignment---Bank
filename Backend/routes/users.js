@@ -29,35 +29,38 @@ userRouter.get("/", (req, res) => {
 userRouter.post("/login", async (req, res) => {
   let { username } = req.body;
   console.log(req.body.name);
-
-  let user = await usersCollection.findOne({ username });
-
-  console.log(req.body.password);
-  if (!user) {
-    return res.status(400).json({ message: "There is no such user" });
+  let user;
+  try {
+    user = await usersCollection.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: "There is no such user" });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err });
   }
-  console.log(user.password);
-  console.log(user.password);
+
   let passMatch = await checkPassword(req.body.password, user.password);
   if (passMatch) {
-    res.status(200).json({ message: "Hey there, you exist", user });
-    console.log("user has logged in");
-    console.log(user, "a user");
+    const accessJWT = generateAccessToken(user._id);
+    const refreshJWT = generateRefreshToken(user._id);
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { refreshToken: refreshJWT } }
+    );
+    res.status(200).json({
+      message: "Login successful!",
+      aJWT: accessJWT,
+      rJWT: refreshJWT,
+    });
   } else {
     res.status(404).json({ message: "Invalid passowrd", user });
   }
-  //  else if (user.password !== req.body.password) {
-  //   res.json({ message: "Something went wrong" });
-  //   console.log("smth went wrong");
-  // }
 });
 
 //Creating user
 userRouter.post("/", async (req, res) => {
   let { username } = req.body;
-  console.log(username);
   let user = await usersCollection.findOne({ username });
-  console.log(user, "should be null");
   if (user) {
     return res
       .status(400)
@@ -66,7 +69,6 @@ userRouter.post("/", async (req, res) => {
 
   try {
     let hashedPass = await hashPassword(req.body.password);
-    console.log(hashedPass);
     let newUser = await usersCollection.insertOne({
       _id: crypto.randomUUID(),
       username: req.body.username,
@@ -96,19 +98,6 @@ async function checkPassword(password, hashedPassword) {
 }
 
 //_______________________
-
-// a jwt middleware, may export
-
-function generateJWT(user) {
-  const userData = {
-    id: user._id,
-    username: user.username,
-  };
-
-  const token = jwt.sign(userData, "Will change for .env", { expiresIn: "2h" });
-
-  return token;
-}
 
 // Function to generate access token
 function generateAccessToken(userId) {
@@ -147,7 +136,7 @@ export async function verifyRefreshToken(req, res, next) {
       const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
       try {
-        let rToken = await usersCollection.findOne({ token: token });
+        let rToken = await usersCollection.findOne({ refreshToken: token });
         if (!rToken) {
           return res
             .status(403)
@@ -171,7 +160,8 @@ app.get("/token", verifyRefreshToken, (req, res) => {
   res.json({ JWT: JWT });
 });
 
-
+// Will be route for logging out
+app.get("users/logout", (req, res) => {});
 
 export default userRouter;
 
