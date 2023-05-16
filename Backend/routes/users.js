@@ -2,7 +2,7 @@ import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
 import crypto from "crypto"; // from googling i learnt of nodes inbuilt crypto method to generate UUID
 import bcrypt from "bcrypt"; // package for encryption/decryption
-import jsonwebtoken from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -155,13 +155,13 @@ export async function verifyRefreshToken(req, res, next) {
   }
 }
 
-app.get("/token", verifyRefreshToken, (req, res) => {
+userRouter.get("/token", verifyRefreshToken, (req, res) => {
   const JWT = generateAccessToken(req.user);
   res.json({ JWT: JWT });
 });
 
 // Will be route for logging out
-app.get("users/logout", (req, res) => {});
+userRouter.get("users/logout", (req, res) => {});
 
 export default userRouter;
 
