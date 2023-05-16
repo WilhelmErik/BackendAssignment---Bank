@@ -10,6 +10,7 @@ const userRouter = express.Router();
 userRouter.use(express.json());
 userRouter.use(express.urlencoded({ extended: true }));
 import { mainConnect } from "../db/connections.js";
+import { error } from "console";
 let db, usersCollection;
 (async () => {
   db = await mainConnect();
@@ -129,26 +130,32 @@ function verifyAccessToken(req, res, next) {
       req.user = user;
       next();
     } catch (err) {
-      return res.status(403);
+      return res.status(403).json({ message: "Invalid access token" });
     }
   } else {
-    return res.status(401);
+    return res.status(401).json({message: 'No access token provided'});
   }
 }
 
-function verifyRefreshToken(req, res, next) {
+export async function verifyRefreshToken(req, res, next) {
   const authHead = req.headers.auth;
   if (authHead) {
     const token = authHead.split(" "[1]);
     try {
       const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+      let rToken = await usersCollection.findOne({ token: token });
+      if (!token) {
+        throw new Error("There is no refresh token in db ");
+      }
+
       req.user = user;
       next();
     } catch (err) {
-      return res.status(403);
+      return res.status(403).json({ message: "Invalid access token" });
     }
   } else {
-    return res.status(401);
+    return res.status(401).json({message: 'No access token provided'});
   }
 }
 
