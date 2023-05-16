@@ -111,51 +111,58 @@ function generateJWT(user) {
 }
 
 // Function to generate access token
-function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+function generateAccessToken(userId) {
+  return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1h",
+  });
 }
 
 // Function to generate refreshh token
-function generateRefreshToken(user) {
-  return jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
+function generateRefreshToken(userId) {
+  return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET);
 }
 
 // Function to validate token
 function verifyAccessToken(req, res, next) {
   const authHead = req.headers.auth;
   if (authHead) {
-    const token = authHead.split(" "[1]);
+    const token = authHead.split(" ")[1];
     try {
       const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-      req.user = user;
+      req.userId = user.userId;
       next();
     } catch (err) {
       return res.status(403).json({ message: "Invalid access token" });
     }
   } else {
-    return res.status(401).json({message: 'No access token provided'});
+    return res.status(401).json({ message: "No access token provided" });
   }
 }
 
 export async function verifyRefreshToken(req, res, next) {
   const authHead = req.headers.auth;
   if (authHead) {
-    const token = authHead.split(" "[1]);
+    const token = authHead.split(" ")[1];
     try {
       const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-      let rToken = await usersCollection.findOne({ token: token });
-      if (!token) {
-        throw new Error("There is no refresh token in db ");
+      try {
+        let rToken = await usersCollection.findOne({ token: token });
+        if (!rToken) {
+          return res
+            .status(403)
+            .json({ message: "Invalid / Refresh token not found" });
+        }
+      } catch (dberr) {
+        return res.status(500).json({ message: "Internal server error" });
       }
-
       req.user = user;
       next();
     } catch (err) {
-      return res.status(403).json({ message: "Invalid access token" });
+      return res.status(403).json({ message: "Invalid refresh token" });
     }
   } else {
-    return res.status(401).json({message: 'No access token provided'});
+    return res.status(401).json({ message: "No access token provided" });
   }
 }
 
@@ -164,16 +171,7 @@ app.get("/token", verifyRefreshToken, (req, res) => {
   res.json({ JWT: JWT });
 });
 
-app.post("/token", (req, res) => {
-  const refreshToken = req.body.token;
-  if (refreshToken == null) return res.sendStatus(401);
-  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    const accessToken = generateAccessToken({ name: user.name });
-    res.json({ accessToken: accessToken });
-  });
-});
+
 
 export default userRouter;
 
