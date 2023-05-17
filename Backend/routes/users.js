@@ -51,6 +51,8 @@ userRouter.post("/login", async (req, res) => {
       message: "Login successful!",
       aJWT: accessJWT,
       rJWT: refreshJWT,
+      username: user.username,
+      _id: user._id,
     });
   } else {
     res.status(404).json({ message: "Invalid passowrd", user });
@@ -75,7 +77,7 @@ userRouter.post("/", async (req, res) => {
       password: hashedPass,
     });
     let user = await usersCollection.findOne({ username });
-    res.status(201).json({ newUser, user });
+    res.status(201).json({ message: "User successfully created" });
     console.log("user has been created");
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -157,7 +159,7 @@ export async function verifyRefreshToken(req, res, next) {
 
 userRouter.get("/token", verifyRefreshToken, (req, res) => {
   const JWT = generateAccessToken(req.user);
-  res.json({ JWT: JWT });
+  res.json({ aJWT: JWT });
 });
 
 // Will be route for logging out

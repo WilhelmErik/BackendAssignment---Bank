@@ -28,7 +28,11 @@ export async function authentication(target) {
       ${data.message} pong`);
     }
 
-    sessionStorage.setItem("userID", data.user._id);
+    sessionStorage.setItem("userID", data._id);
+
+    localStorage.setItem("aJWT", data.aJWT);
+    localStorage.setItem("rJWT", data.rJWT);
+
     //  let usersID = sessionStorage.getItem("userID");
     document.getElementById("auth-page").style.display = "none";
     document.getElementById("main").style.display = "inherit";
@@ -71,6 +75,28 @@ document
     document.getElementById("account-form").style.display = "none";
   });
 
+async function getNewToken() {
+  const rJWT = localStorage.getItem("rJWT");
+  try {
+    const res = await fetch(baseAPI + "token", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${rJWT}`,
+      },
+    });
+    console.log(res);
+    if (!response.ok) {
+      throw new Error(`HTTP ERROR! Status: ${response.status}:
+    ${response.message} `);
+    }
+    const data = await res.json();
+    localStorage.setItem("aJWT", data.aJWT);
+    console.log("new token set ");
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 // document.getElementById("submit-account").style.display = "none";
 export async function isLoggedIn() {
   if (sessionStorage.getItem("userID")) {
@@ -91,11 +117,16 @@ export function hideAll() {
 }
 
 async function getAccounts(id) {
-  const res = await fetch(baseAPI + "accounts/" + id);
-  console.log(res);
-  let data = await res.json();
-  console.log(data, "data");
-  renderAccounts(data);
+  const aJWT = localStorage.getItem("aJWT");
+  try {
+    const res = await fetch(baseAPI + "accounts/" + id);
+    console.log(res);
+    let data = await res.json();
+    console.log(data, "data");
+    renderAccounts(data);
+  } catch (err) {
+    console.log(err);
+  }
 }
 function renderAccounts(accounts) {
   let userAccounts = document.getElementById("user-accounts");
@@ -168,4 +199,26 @@ async function accountButtonListener(accountDiv, account) {
   //     let data = await res.json();
   //     console.log(data);
   //   });
+}
+
+async function makeRequest(requestFunction) {
+  try {
+    let smth = await requestFunction();
+    if (!smth.res.ok) {
+      throw new Error();
+    }
+    return smth;
+  } catch (err) {
+    if (res.status === 403) {
+      try {
+        await getNewToken();
+        smth = await requestFunction();
+      } catch (error) {
+        console.log(error);
+        //..code to log user out
+        throw new Error("Unable to refresh token, please login again.");
+      }
+    }
+    return smth;
+  }
 }
