@@ -77,6 +77,7 @@ document
 
 async function getNewToken() {
   const rJWT = localStorage.getItem("rJWT");
+  console.log("Requesting a new token");
   try {
     const res = await fetch(baseAPI + "token", {
       headers: {
@@ -85,7 +86,7 @@ async function getNewToken() {
       },
     });
     console.log(res);
-    if (!response.ok) {
+    if (!res.ok) {
       throw new Error(`HTTP ERROR! Status: ${response.status}:
     ${response.message} `);
     }
@@ -102,7 +103,15 @@ export async function isLoggedIn() {
   if (sessionStorage.getItem("userID")) {
     hideAll();
     document.getElementById("main").style.display = "inherit";
-    getAccounts(sessionStorage.getItem("userID"));
+
+    let accounts = await makeRequest(() =>
+      getAccounts(sessionStorage.getItem("userID"))
+    );
+    // let accounts2 = await accounts.json();
+    // console.log(accounts2, "from isloggedin");
+    console.log(accounts, "from isloggedin");
+
+    renderAccounts(accounts);
   } else {
     hideAll();
     document.getElementById("auth-page").style.display = "inherit";
@@ -119,16 +128,26 @@ export function hideAll() {
 async function getAccounts(id) {
   const aJWT = localStorage.getItem("aJWT");
   try {
-    const res = await fetch(baseAPI + "accounts/" + id);
+    const res = await fetch(baseAPI + "accounts/" + id, {
+      headers: {
+        Authorization: `Bearer ${aJWT}`,
+      },
+    });
     console.log(res);
+    if (!res.ok) {
+      throw new Error(`HTTP ERROR! Status: ${res.status}`);
+    }
+    console.log(res, "res in accounts");
     let data = await res.json();
     console.log(data, "data");
-    renderAccounts(data);
+    return data;
   } catch (err) {
     console.log(err);
+    return res;
   }
 }
 function renderAccounts(accounts) {
+  console.log(accounts);
   let userAccounts = document.getElementById("user-accounts");
   userAccounts.innerHTML = "";
   accounts.forEach((account) => {
@@ -202,23 +221,23 @@ async function accountButtonListener(accountDiv, account) {
 }
 
 async function makeRequest(requestFunction) {
+  console.log("inside makeRequest");
   try {
-    let smth = await requestFunction();
-    if (!smth.res.ok) {
-      throw new Error();
-    }
-    return smth;
+    console.log("asda");
+    const res = await requestFunction();
+    return res;
   } catch (err) {
-    if (res.status === 403) {
+    console.log(err);
+    if (err.status === 403) {
       try {
         await getNewToken();
-        smth = await requestFunction();
+        const res = await requestFunction();
+        return res;
       } catch (error) {
         console.log(error);
         //..code to log user out
         throw new Error("Unable to refresh token, please login again.");
       }
     }
-    return smth;
   }
 }

@@ -102,19 +102,19 @@ async function checkPassword(password, hashedPassword) {
 //_______________________
 
 // Function to generate access token
-function generateAccessToken(userId) {
+export function generateAccessToken(userId) {
   return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "1h",
   });
 }
 
 // Function to generate refreshh token
-function generateRefreshToken(userId) {
+export function generateRefreshToken(userId) {
   return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET);
 }
 
 // Function to validate token
-function verifyAccessToken(req, res, next) {
+export function verifyAccessToken(req, res, next) {
   const authHead = req.headers.auth;
   if (authHead) {
     const token = authHead.split(" ")[1];
@@ -129,7 +129,7 @@ function verifyAccessToken(req, res, next) {
     return res.status(401).json({ message: "No access token provided" });
   }
 }
-
+// Function to validate token
 export async function verifyRefreshToken(req, res, next) {
   const authHead = req.headers.auth;
   if (authHead) {
