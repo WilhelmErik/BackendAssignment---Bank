@@ -115,7 +115,7 @@ export function generateRefreshToken(userId) {
 
 // Function to validate token
 export function verifyAccessToken(req, res, next) {
-  const authHead = req.headers.auth;
+  const authHead = req.headers.authorization;
   if (authHead) {
     const token = authHead.split(" ")[1];
     try {
@@ -131,7 +131,8 @@ export function verifyAccessToken(req, res, next) {
 }
 // Function to validate token
 export async function verifyRefreshToken(req, res, next) {
-  const authHead = req.headers.auth;
+  console.log("verifying refresh");
+  const authHead = req.headers.authorization;
   if (authHead) {
     const token = authHead.split(" ")[1];
     try {
@@ -158,6 +159,7 @@ export async function verifyRefreshToken(req, res, next) {
 }
 
 userRouter.get("/token", verifyRefreshToken, (req, res) => {
+  console.log("someone wants a new token ");
   const JWT = generateAccessToken(req.user);
   res.json({ aJWT: JWT });
 });

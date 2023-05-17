@@ -79,20 +79,25 @@ async function getNewToken() {
   const rJWT = localStorage.getItem("rJWT");
   console.log("Requesting a new token");
   try {
-    const res = await fetch(baseAPI + "token", {
+    const res = await fetch(baseAPI + "users/token", {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${rJWT}`,
       },
     });
-    console.log(res);
-    if (!res.ok) {
+    console.log(res, "result of asking for a new token");
+    console.log(res.ok, "is res ok ?=");
+    if (res.ok) {
+      console.log("res is indeed ok !");
+      const data = await res.json();
+      console.log(data, "should be a token here somewhere");
+      localStorage.setItem("aJWT", data.aJWT);
+      console.log("new token set ");
+    } else {
+      console.log("res.ok is not true");
       throw new Error(`HTTP ERROR! Status: ${response.status}:
     ${response.message} `);
     }
-    const data = await res.json();
-    localStorage.setItem("aJWT", data.aJWT);
-    console.log("new token set ");
   } catch (err) {
     console.error(err);
   }
@@ -127,23 +132,30 @@ export function hideAll() {
 
 async function getAccounts(id) {
   const aJWT = localStorage.getItem("aJWT");
+  console.log(aJWT, "access token ");
+  let status;
   try {
     const res = await fetch(baseAPI + "accounts/" + id, {
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${aJWT}`,
       },
     });
     console.log(res);
+    let data = await res.json();
     if (!res.ok) {
-      throw new Error(`HTTP ERROR! Status: ${res.status}`);
+      status = res.status;
+      console.log(status);
+      throw new Error(`HTTP ERROR! Status: ${res.status} also ${data.message}`);
     }
     console.log(res, "res in accounts");
-    let data = await res.json();
+
     console.log(data, "data");
     return data;
   } catch (err) {
-    console.log(err);
-    return res;
+    console.log(err, "owell");
+    console.log("am i here ");
+    return status;
   }
 }
 function renderAccounts(accounts) {
@@ -225,19 +237,24 @@ async function makeRequest(requestFunction) {
   try {
     console.log("asda");
     const res = await requestFunction();
+    if (res == 403) {
+      console.log("SO MANY LOGS");
+      throw new Error("Forbidden");
+    }
+    console.log(res, "eyo");
     return res;
   } catch (err) {
-    console.log(err);
-    if (err.status === 403) {
-      try {
-        await getNewToken();
-        const res = await requestFunction();
-        return res;
-      } catch (error) {
-        console.log(error);
-        //..code to log user out
-        throw new Error("Unable to refresh token, please login again.");
-      }
+    console.log(err, "first catch error inside makeRequest");
+    try {
+      console.log("am i here");
+      await getNewToken();
+      console.log("new token should be set");
+      const res = await requestFunction();
+      return res;
+    } catch (error) {
+      console.log(error);
+      //..code to log user out
+      throw new Error("Unable to refresh token, please login again.");
     }
   }
 }

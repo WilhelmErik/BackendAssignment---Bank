@@ -1,5 +1,15 @@
 import crypto from "crypto";
 import express from "express";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+} from "../middleware/tokens.js";
+
 const accountRouter = express.Router();
 accountRouter.use(express.json());
 accountRouter.use(express.urlencoded({ extended: true }));
@@ -29,7 +39,7 @@ accountRouter.post("/", async (req, res) => {
   }
 });
 
-accountRouter.get("/:id", async (req, res) => {
+accountRouter.get("/:id", verifyAccessToken, async (req, res) => {
   console.log(req.params.id);
   let userID = req.params.id;
   console.log(userID);
@@ -45,7 +55,7 @@ accountRouter.delete("/:id", (req, res) => {
   let _id = req.params.id;
   try {
     const deleted = accountsCollection.deleteOne({ _id });
-    res.status(200).json({ message: "deleted "});
+    res.status(200).json({ message: "deleted " });
   } catch (err) {
     res.status(500).json({ message: err });
   }
