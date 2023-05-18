@@ -225,6 +225,7 @@ async function accountButtonListeners(accountDiv, account) {
     console.log(res, "result");
     if (res.ok) {
       accountDiv.remove();
+      isLoggedIn();
     }
     let data = await res.json();
     console.log(data);
@@ -239,6 +240,17 @@ async function accountButtonListeners(accountDiv, account) {
   //_________________________________________________________________
 
   //__________________________Save Withdraw__________________________
+  saveWithdraw.addEventListener("click", async () => {
+    console.log("Will withdraw");
+    let changed = await makeRequest(() => {
+      return account.withdraw(withdrawInput.value);
+    });
+    if (changed == 200) {
+      isLoggedIn();
+    }
+    console.log(changed);
+    console.log("withdrawed");
+  });
   //_________________________________________________________________
   //__________________________Display Deposit__________________________
   depositButton.addEventListener("click", () => {
@@ -251,12 +263,15 @@ async function accountButtonListeners(accountDiv, account) {
   //__________________________Save Deposit__________________________
 
   saveDeposit.addEventListener("click", async () => {
-    console.log("Will change");
+    console.log("Will deposit");
     let changed = await makeRequest(() => {
-      account.deposit(depositInput.value);
+      return account.deposit(depositInput.value);
     });
+    if (changed == 200) {
+      isLoggedIn();
+    }
     console.log(changed);
-    console.log("changed");
+    console.log("deposited");
   });
   //_________________________________________________________________
 }
@@ -265,12 +280,14 @@ async function makeRequest(requestFunction) {
   console.log("inside makeRequest");
   try {
     console.log("asda");
-    const res = await requestFunction();
+    let res = await requestFunction();
     if (res == 403) {
       console.log("SO MANY LOGS");
       throw new Error("Forbidden");
     }
     console.log(res, "eyo");
+    console.log(typeof res);
+
     return res;
   } catch (err) {
     console.log(err, "first catch error inside makeRequest");
@@ -292,53 +309,55 @@ async function makeRequest(requestFunction) {
 
 class Account {
   constructor(id, name, balance) {
-    Object.assign(this, { id, name, balance });
+    Object.assign(this, { id, name, balance: Number(balance) });
   }
 
   async deposit(amount) {
     const aJWT = localStorage.getItem("aJWT");
     this.balance += +amount;
-    console.log(this.balance, "new balance");
-    await makeRequest(async () => {
-      try {
-        const res = await fetch(baseAPI + "accounts/" + this.id, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${aJWT}`,
-          },
-          body: JSON.stringify({ balance: this.balance }),
-        });
-        let data = res.json();
-        console.log(data);
-        console.log(res);
-        return res;
-      } catch (err) {
-        console.log(err);
-      }
-    });
+
+    try {
+      const res = await fetch(baseAPI + "accounts/" + this.id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${aJWT}`,
+        },
+        body: JSON.stringify({ balance: this.balance }),
+      });
+
+      console.log(res, "sigh");
+      console.log(res.status);
+      return res.status;
+    } catch (err) {
+      console.log(err);
+    }
   }
   //--------
   //--------
 
   async withdraw(amount) {
     const aJWT = localStorage.getItem("aJWT");
-    if (amount > this.balance) {
+    if (+amount > this.balance) {
+      alert("you cant withdraw more than you have !");
       throw new Error("Insufficient funds");
     }
-    this.balance -= amount;
-    await makeRequest(() => {
-      try {
-        fetch(baseAPI + "accounts/" + this.id, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${aJWT}`,
-          },
-          body: JSON.stringify({ balance: this.balance }),
-        });
-      } catch (err) {}
-    });
+    this.balance -= +amount;
+
+    try {
+      const res = await fetch(baseAPI + "accounts/" + this.id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${aJWT}`,
+        },
+        body: JSON.stringify({ balance: this.balance }),
+      });
+      console.log(res, "in withdraw");
+      return res.status;
+    } catch (err) {
+      console.log(err);
+    }
   }
   //--------
   //--------
