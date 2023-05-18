@@ -49,7 +49,21 @@ accountRouter.get("/:id", verifyAccessToken, async (req, res) => {
   res.status(200).json(accounts);
 }); // get a specific account
 
-accountRouter.patch("/:id" /* ... */); //update a specific account
+accountRouter.patch("/:id", verifyAccessToken, async (req, res) => {
+  try {
+    const account = await accountsCollection.updateOne(
+      {
+        _id: req.params.id,
+      },
+      { $set: { balance: req.body.balance } }
+    );
+    res.status(200).json({ message: "Account updated ?", acc: account });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong on our side", error: err });
+  }
+}); //update a specific account
 
 accountRouter.delete("/:id", (req, res) => {
   let _id = req.params.id;

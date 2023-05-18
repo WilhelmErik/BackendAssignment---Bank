@@ -148,13 +148,18 @@ async function getAccounts(id) {
       console.log(status);
       throw new Error(`HTTP ERROR! Status: ${res.status} also ${data.message}`);
     }
-    return data;
+    const accounts = data.map(
+      (account) =>
+        new Account(account._id, account.accountname, account.balance)
+    );
+    console.log(accounts, "these should be classes");
+    return accounts;
   } catch (err) {
     return status;
   }
 }
 function renderAccounts(accounts) {
-  console.log(accounts);
+  console.log(accounts, "accounts from renderAcocunts");
   let userAccounts = document.getElementById("user-accounts");
   userAccounts.innerHTML = "";
   accounts.forEach((account) => {
@@ -165,7 +170,7 @@ function renderAccounts(accounts) {
     accountDiv.classList.add("account-div");
     // accountDiv.dataset.id = account._id;
     accountDiv.innerHTML = ` 
-    <h2>Account: ${account.accountname}</h2>
+    <h2>Account: ${account.name}</h2>
     <h3>Balance: ${account.balance} $</h3>
 
     <div class="account-buttons">
@@ -229,19 +234,7 @@ async function accountButtonListeners(accountDiv, account) {
 
   //__________________________Save Withdraw__________________________
 
-  //   editButton.addEventListener("click", async (e) => {
-  //     const res = await fetch(baseAPI + "accounts/" + account._id, {
-  //       method: "PATCH",
-  //       headers: header,
-  //       body: JSON.stringify({
-  //         balance:
-  //       })
-  //     });
-
-  //     console.log(res);
-  //     let data = await res.json();
-  //     console.log(data);
-  //   });
+  
 
   //__________________________Display Deposit__________________________
   depositButton.addEventListener("click", () => {
@@ -252,6 +245,7 @@ async function accountButtonListeners(accountDiv, account) {
 
   //__________________________Save Deposit__________________________
 }
+
 
 async function makeRequest(requestFunction) {
   console.log("inside makeRequest");
@@ -292,7 +286,7 @@ class Account {
     await makeRequest(async () => {
       try {
         const res = fetch(baseAPI + "accounts/" + this.id, {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${aJWT}`,
@@ -316,7 +310,7 @@ class Account {
     await makeRequest(() => {
       try {
         fetch(baseAPI + "accounts/" + this.id, {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${aJWT}`,
