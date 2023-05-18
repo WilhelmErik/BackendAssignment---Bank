@@ -4,6 +4,7 @@ import { authentication, isLoggedIn } from "./modules/api-functions.js";
 // i want a button to add more accounts, which should show me a form where i can decide on the name and the amount i want to deposit
 
 isLoggedIn();
+
 document.getElementById("display-login").addEventListener("click", (e) => {
   document.getElementById("mail-div").style.display = "none";
   document.getElementById("submit-login").style.display = "inherit";

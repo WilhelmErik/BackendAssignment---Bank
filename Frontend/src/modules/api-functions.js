@@ -38,7 +38,7 @@ export async function authentication(target) {
     document.getElementById("main").style.display = "inherit";
 
     console.log("Hello there");
-
+    isLoggedIn();
     console.log(data);
   } catch (error) {
     console.error(error, "something is very wrong");
@@ -148,13 +148,8 @@ async function getAccounts(id) {
       console.log(status);
       throw new Error(`HTTP ERROR! Status: ${res.status} also ${data.message}`);
     }
-    console.log(res, "res in accounts");
-
-    console.log(data, "data");
     return data;
   } catch (err) {
-    console.log(err, "owell");
-    console.log("am i here ");
     return status;
   }
 }
@@ -170,41 +165,48 @@ function renderAccounts(accounts) {
     accountDiv.classList.add("account-div");
     // accountDiv.dataset.id = account._id;
     accountDiv.innerHTML = ` 
-    <p>Account: ${account.accountname}</p>
-    <p>Balance: ${account.balance}$</p>
+    <h2>Account: ${account.accountname}</h2>
+    <h3>Balance: ${account.balance} $</h3>
+
+    <div class="account-buttons">
+<button class="withdraw-button"> Withdraw </button>
+<input type="number"class="withdraw-input hidden" "/>
+<button class="save-withdraw withdraw hidden">Save</button>
+</div>
+<div class="account-buttons">
+
+<button class="deposit-button"> Deposit </button>
+<input type="number"class="deposit-input hidden" />
+<button class="save-dep hidden">Save</button>
+
+    </div>
+    <button class="delete-button"> Delete </button>
+
+    <div>
+
+    </div>
     `;
-    let edit = document.createElement("button");
-    let remove = document.createElement("button");
-    edit.innerText = "Edit";
-    remove.innerText = "Remove";
-    accountDiv.append(edit);
-    accountDiv.append(remove);
 
-    remove.classList.add("remove-button");
-    edit.classList.add("edit-button");
-
-    // remove.addEventListener("click", async (e) => {
-    //   console.log(e.target.tagName);
-    //   const res = await fetch(baseAPI + "accounts/" + account._id, {
-    //     method: "DELETE",
-    //     headers: header,
-    //   });
-    //   console.log(res);
-    //   let data = await res.json();
-    //   console.log(data);
-    // });
-
-    accountButtonListener(accountDiv, account);
+    accountButtonListeners(accountDiv, account);
+    console.log("events?");
   });
 }
 
 document.getElementById("account-div");
 
-async function accountButtonListener(accountDiv, account) {
-  const removeButton = accountDiv.querySelector(".remove-button");
-  const editButton = accountDiv.querySelector(".edit-button");
+async function accountButtonListeners(accountDiv, account) {
+  const withdrawButton = accountDiv.querySelector(".withdraw-button");
+  const saveWithdraw = accountDiv.querySelector(".save-withdraw");
+  const depositButton = accountDiv.querySelector(".deposit-button");
+  const saveDeposit = accountDiv.querySelector(".save-dep");
 
-  removeButton.addEventListener("click", async (e) => {
+  const depositInput = accountDiv.querySelector(".deposit-input");
+  const withdrawInput = accountDiv.querySelector(".withdraw-input");
+
+  const saveDelete = accountDiv.querySelector(".delete-button");
+
+  //________________________Delete account________________________________
+  saveDelete.addEventListener("click", async (e) => {
     const res = await fetch(baseAPI + "accounts/" + account._id, {
       method: "DELETE",
       headers: header,
@@ -217,6 +219,16 @@ async function accountButtonListener(accountDiv, account) {
     let data = await res.json();
     console.log(data);
   });
+  //_____________________________________________________________
+  //__________________________Display Withdraw__________________________
+  withdrawButton.addEventListener("click", () => {
+    console.log(account);
+    saveWithdraw.classList.toggle("hidden");
+    withdrawInput.classList.toggle("hidden");
+  });
+
+  //__________________________Save Withdraw__________________________
+
   //   editButton.addEventListener("click", async (e) => {
   //     const res = await fetch(baseAPI + "accounts/" + account._id, {
   //       method: "PATCH",
@@ -230,6 +242,15 @@ async function accountButtonListener(accountDiv, account) {
   //     let data = await res.json();
   //     console.log(data);
   //   });
+
+  //__________________________Display Deposit__________________________
+  depositButton.addEventListener("click", () => {
+    console.log(account);
+    saveDeposit.classList.toggle("hidden");
+    depositInput.classList.toggle("hidden");
+  });
+
+  //__________________________Save Deposit__________________________
 }
 
 async function makeRequest(requestFunction) {
@@ -257,4 +278,73 @@ async function makeRequest(requestFunction) {
       throw new Error("Unable to refresh token, please login again.");
     }
   }
+}
+
+// will try to make a class for convenience sake
+
+class Account {
+  constructor(id, name, balance) {
+    Object.assign(this, { id, name, balance });
+  }
+
+  async deposit(amount) {
+    this.balance += amount;
+    await makeRequest(async () => {
+      try {
+        const res = fetch(baseAPI + "accounts/" + this.id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${aJWT}`,
+          },
+          body: JSON.stringify({ balance: this.balance }),
+        });
+        return res;
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  }
+  //--------
+  //--------
+
+  async withdraw(amount) {
+    if (amount > this.balance) {
+      throw new Error("Insufficient funds");
+    }
+    this.balance -= amount;
+    await makeRequest(() => {
+      try {
+        fetch(baseAPI + "accounts/" + this.id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${aJWT}`,
+          },
+          body: JSON.stringify({ balance: this.balance }),
+        });
+      } catch (err) {}
+    });
+  }
+  //--------
+  //--------
+  //--------
+  async delete() {
+    await makeRequest(() => {
+      try {
+        fetch(baseAPI + "accounts/" + this.id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${aJWT}`,
+          },
+        });
+      } catch (err) {}
+    });
+  }
+  //--------
+  //--------
+  //--------
+  //--------
+  //--------
 }
