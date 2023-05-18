@@ -212,9 +212,14 @@ async function accountButtonListeners(accountDiv, account) {
 
   //________________________Delete account________________________________
   saveDelete.addEventListener("click", async (e) => {
-    const res = await fetch(baseAPI + "accounts/" + account._id, {
+    const aJWT = localStorage.getItem("aJWT");
+    console.log(account.id);
+    const res = await fetch(baseAPI + "accounts/" + account.id, {
       method: "DELETE",
-      headers: header,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${aJWT}`,
+      },
     });
 
     console.log(res, "result");
@@ -231,21 +236,30 @@ async function accountButtonListeners(accountDiv, account) {
     saveWithdraw.classList.toggle("hidden");
     withdrawInput.classList.toggle("hidden");
   });
+  //_________________________________________________________________
 
   //__________________________Save Withdraw__________________________
-
-  
-
+  //_________________________________________________________________
   //__________________________Display Deposit__________________________
   depositButton.addEventListener("click", () => {
-    console.log(account);
+    console.log(account, "what do we have here , display");
     saveDeposit.classList.toggle("hidden");
     depositInput.classList.toggle("hidden");
+    console.log(depositInput.value);
   });
-
+  //_________________________________________________________________
   //__________________________Save Deposit__________________________
-}
 
+  saveDeposit.addEventListener("click", async () => {
+    console.log("Will change");
+    let changed = await makeRequest(() => {
+      account.deposit(depositInput.value);
+    });
+    console.log(changed);
+    console.log("changed");
+  });
+  //_________________________________________________________________
+}
 
 async function makeRequest(requestFunction) {
   console.log("inside makeRequest");
@@ -282,10 +296,12 @@ class Account {
   }
 
   async deposit(amount) {
-    this.balance += amount;
+    const aJWT = localStorage.getItem("aJWT");
+    this.balance += +amount;
+    console.log(this.balance, "new balance");
     await makeRequest(async () => {
       try {
-        const res = fetch(baseAPI + "accounts/" + this.id, {
+        const res = await fetch(baseAPI + "accounts/" + this.id, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -293,6 +309,9 @@ class Account {
           },
           body: JSON.stringify({ balance: this.balance }),
         });
+        let data = res.json();
+        console.log(data);
+        console.log(res);
         return res;
       } catch (err) {
         console.log(err);
@@ -303,6 +322,7 @@ class Account {
   //--------
 
   async withdraw(amount) {
+    const aJWT = localStorage.getItem("aJWT");
     if (amount > this.balance) {
       throw new Error("Insufficient funds");
     }

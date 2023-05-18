@@ -65,11 +65,17 @@ accountRouter.patch("/:id", verifyAccessToken, async (req, res) => {
   }
 }); //update a specific account
 
-accountRouter.delete("/:id", (req, res) => {
+accountRouter.delete("/:id", verifyAccessToken, async (req, res) => {
   let _id = req.params.id;
   try {
-    const deleted = accountsCollection.deleteOne({ _id });
-    res.status(200).json({ message: "deleted " });
+    const deleted = await accountsCollection.deleteOne({ _id });
+    if (deleted.deletedCount == 0) {
+      res.status(400).json({ message: "No it wasnt deleted" });
+    } else {
+      res.status(200).json({ message: "deleted " });
+    }
+
+    console.log(deleted);
   } catch (err) {
     res.status(500).json({ message: err });
   }
