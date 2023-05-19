@@ -17,25 +17,23 @@ export async function authentication(target) {
         password: password.value,
       }),
     });
-
-    console.log(response, "response");
-    console.log(response.message, "response.message");
-    console.log(response.status, "response.status");
     let data = await response.json();
     console.log(data);
     if (!response.ok) {
       throw new Error(`HTTP ERROR! Status: ${response.status} ping
       ${data.message} pong`);
     }
-
-    sessionStorage.setItem("userID", data._id);
-
-    localStorage.setItem("aJWT", data.aJWT);
-    localStorage.setItem("rJWT", data.rJWT);
+    if (endpoint !== "users") {
+      sessionStorage.setItem("userID", data._id);
+      localStorage.setItem("aJWT", data.aJWT);
+      localStorage.setItem("rJWT", data.rJWT);
+      document.getElementById("auth-page").style.display = "none";
+      document.getElementById("main").style.display = "inherit";
+    } else if (endpoint === "users") {
+      alert("account successfully created, please login");
+    }
 
     //  let usersID = sessionStorage.getItem("userID");
-    document.getElementById("auth-page").style.display = "none";
-    document.getElementById("main").style.display = "inherit";
 
     console.log("Hello there");
     isLoggedIn();
@@ -278,12 +276,15 @@ async function accountButtonListeners(accountDiv, account) {
 
 async function makeRequest(requestFunction) {
   console.log("inside makeRequest");
+  let status;
   try {
     console.log("asda");
     let res = await requestFunction();
+    console.log(res);
     if (res == 403) {
+      status = 403;
       console.log("SO MANY LOGS");
-      throw new Error("Forbidden");
+      throw new Error("Forbidden", res);
     }
     console.log(res, "eyo");
     console.log(typeof res);
@@ -291,17 +292,20 @@ async function makeRequest(requestFunction) {
     return res;
   } catch (err) {
     console.log(err, "first catch error inside makeRequest");
-    try {
-      console.log("am i here");
-      await getNewToken();
-      console.log("new token should be set");
-      const res = await requestFunction();
-      return res;
-    } catch (error) {
-      console.log(error);
-      //..code to log user out
-      throw new Error("Unable to refresh token, please login again.");
-    }
+    console.log(status);
+    if (status == 403)
+      try {
+        console.log("am i here");
+        await getNewToken();
+        console.log("new token should be set");
+        const res = await requestFunction();
+        console.log(res, "2nd try");
+        return res;
+      } catch (error) {
+        console.log(error);
+        //..code to log user out
+        throw new Error("Unable to refresh token, please login again.");
+      }
   }
 }
 
