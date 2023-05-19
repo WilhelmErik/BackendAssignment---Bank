@@ -37,7 +37,6 @@ export async function authentication(target) {
 
     console.log("Hello there");
     isLoggedIn();
-    console.log(data);
   } catch (error) {
     console.error(error, "something is very wrong");
   }
@@ -46,6 +45,8 @@ export async function authentication(target) {
 document.getElementById("add-account").addEventListener("click", () => {
   document.getElementById("account-form").style.display = "inherit";
 });
+
+// creating an account, not a function currently
 document
   .getElementById("account-form")
   .addEventListener("submit", async (e) => {
@@ -83,12 +84,9 @@ async function getNewToken() {
         Authorization: `Bearer ${rJWT}`,
       },
     });
-    console.log(res, "result of asking for a new token");
-    console.log(res.ok, "is res ok ?=");
+
     if (res.ok) {
-      console.log("res is indeed ok !");
       const data = await res.json();
-      console.log(data, "should be a token here somewhere");
       localStorage.setItem("aJWT", data.aJWT);
       console.log("new token set ");
     } else {
@@ -110,10 +108,6 @@ export async function isLoggedIn() {
     let accounts = await makeRequest(() =>
       getAccounts(sessionStorage.getItem("userID"))
     );
-    // let accounts2 = await accounts.json();
-    // console.log(accounts2, "from isloggedin");
-    console.log(accounts, "from isloggedin");
-
     renderAccounts(accounts);
   } else {
     hideAll();
@@ -130,7 +124,6 @@ export function hideAll() {
 
 async function getAccounts(id) {
   const aJWT = localStorage.getItem("aJWT");
-  console.log(aJWT, "access token ");
   let status;
   try {
     const res = await fetch(baseAPI + "accounts/" + id, {
@@ -139,30 +132,24 @@ async function getAccounts(id) {
         Authorization: `Bearer ${aJWT}`,
       },
     });
-    console.log(res);
     let data = await res.json();
     if (!res.ok) {
       status = res.status;
-      console.log(status);
       throw new Error(`HTTP ERROR! Status: ${res.status} also ${data.message}`);
     }
     const accounts = data.map(
       (account) =>
         new Account(account._id, account.accountname, account.balance)
     );
-    console.log(accounts, "these should be classes");
     return accounts;
   } catch (err) {
     return status;
   }
 }
 function renderAccounts(accounts) {
-  console.log(accounts, "accounts from renderAcocunts");
   let userAccounts = document.getElementById("user-accounts");
   userAccounts.innerHTML = "";
   accounts.forEach((account) => {
-    console.log(account);
-    console.log(account.balance);
     let accountDiv = document.createElement("div");
     userAccounts.append(accountDiv);
     accountDiv.classList.add("account-div");
@@ -191,7 +178,6 @@ function renderAccounts(accounts) {
     `;
 
     accountButtonListeners(accountDiv, account);
-    console.log("events?");
   });
 }
 
@@ -211,7 +197,6 @@ async function accountButtonListeners(accountDiv, account) {
   //________________________Delete account________________________________
   saveDelete.addEventListener("click", async (e) => {
     const aJWT = localStorage.getItem("aJWT");
-    console.log(account.id);
     const res = await fetch(baseAPI + "accounts/" + account.id, {
       method: "DELETE",
       headers: {
@@ -220,18 +205,15 @@ async function accountButtonListeners(accountDiv, account) {
       },
     });
 
-    console.log(res, "result");
     if (res.ok) {
       accountDiv.remove();
       isLoggedIn();
     }
     let data = await res.json();
-    console.log(data);
   });
   //_____________________________________________________________
   //__________________________Display Withdraw__________________________
   withdrawButton.addEventListener("click", () => {
-    console.log(account);
     saveWithdraw.classList.toggle("hidden");
     withdrawInput.classList.toggle("hidden");
   });
@@ -239,65 +221,50 @@ async function accountButtonListeners(accountDiv, account) {
 
   //__________________________Save Withdraw__________________________
   saveWithdraw.addEventListener("click", async () => {
-    console.log("Will withdraw");
     let changed = await makeRequest(() => {
       return account.withdraw(withdrawInput.value);
     });
     if (changed == 200) {
       isLoggedIn();
     }
-    console.log(changed);
-    console.log("withdrawed");
   });
   //_________________________________________________________________
   //__________________________Display Deposit__________________________
   depositButton.addEventListener("click", () => {
-    console.log(account, "what do we have here , display");
     saveDeposit.classList.toggle("hidden");
     depositInput.classList.toggle("hidden");
-    console.log(depositInput.value);
   });
   //_________________________________________________________________
   //__________________________Save Deposit__________________________
 
   saveDeposit.addEventListener("click", async () => {
-    console.log("Will deposit");
     let changed = await makeRequest(() => {
       return account.deposit(depositInput.value);
     });
     if (changed == 200) {
       isLoggedIn();
     }
-    console.log(changed);
-    console.log("deposited");
   });
   //_________________________________________________________________
 }
 
 async function makeRequest(requestFunction) {
-  console.log("inside makeRequest");
   let status;
   try {
-    console.log("asda");
     let res = await requestFunction();
-    console.log(res);
     if (res == 403) {
       status = 403;
       console.log("SO MANY LOGS");
       throw new Error("Forbidden", res);
     }
     console.log(res, "eyo");
-    console.log(typeof res);
 
     return res;
   } catch (err) {
     console.log(err, "first catch error inside makeRequest");
-    console.log(status);
     if (status == 403)
       try {
-        console.log("am i here");
         await getNewToken();
-        console.log("new token should be set");
         const res = await requestFunction();
         console.log(res, "2nd try");
         return res;
@@ -329,9 +296,6 @@ class Account {
         },
         body: JSON.stringify({ balance: this.balance }),
       });
-
-      console.log(res, "sigh");
-      console.log(res.status);
       return res.status;
     } catch (err) {
       console.log(err);
@@ -357,7 +321,6 @@ class Account {
         },
         body: JSON.stringify({ balance: this.balance }),
       });
-      console.log(res, "in withdraw");
       return res.status;
     } catch (err) {
       console.log(err);
