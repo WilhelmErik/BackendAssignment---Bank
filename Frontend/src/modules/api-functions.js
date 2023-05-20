@@ -196,20 +196,29 @@ async function accountButtonListeners(accountDiv, account) {
 
   //________________________Delete account________________________________
   saveDelete.addEventListener("click", async (e) => {
-    const aJWT = localStorage.getItem("aJWT");
-    const res = await fetch(baseAPI + "accounts/" + account.id, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${aJWT}`,
-      },
-    });
 
-    if (res.ok) {
-      accountDiv.remove();
+
+    let changed = await makeRequest(() => {
+      return account.delete();
+    });
+    if (changed == 200) {
       isLoggedIn();
     }
-    let data = await res.json();
+    // const aJWT = localStorage.getItem("aJWT");
+    // const res = await fetch(baseAPI + "accounts/" + account.id, {
+    //   method: "DELETE",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${aJWT}`,
+    //   },
+    // });
+    // if (res.ok) {
+    //   accountDiv.remove();
+    //   isLoggedIn();
+    // }
+    // console.log(res);
+    // return res
+    // let data = await res.json();
   });
   //_____________________________________________________________
   //__________________________Display Withdraw__________________________
@@ -330,18 +339,20 @@ class Account {
   //--------
   //--------
   async delete() {
-    await makeRequest(() => {
-      try {
-        fetch(baseAPI + "accounts/" + this.id, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${aJWT}`,
-          },
-        });
-      } catch (err) {}
-    });
+    const aJWT = localStorage.getItem("aJWT");
+    try {
+      const res = await fetch(baseAPI + "accounts/" + this.id, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${aJWT}`,
+        },
+      });
+      console.log(res);
+      return res.status;
+    } catch (err) {}
   }
+
   //--------
   //--------
   //--------
