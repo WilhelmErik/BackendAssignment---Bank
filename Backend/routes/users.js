@@ -59,6 +59,21 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
+//User logout
+userRouter.get("/logout", verifyAccessToken, async (req, res) => {
+  const usersID = req.userId;
+  console.log("someone wants to logout")
+  try {
+    await usersCollection.updateOne(
+      { _id: usersID },
+      { $unset: { refreshToken: "" } }
+    );
+    res.status(200).json({ message: "User Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong, couldnt log out" });
+  }
+});
+
 //Creating user
 userRouter.post("/", async (req, res) => {
   let { username } = req.body;

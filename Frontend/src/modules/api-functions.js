@@ -24,7 +24,7 @@ export async function authentication(target) {
       ${data.message} pong`);
     }
     if (endpoint !== "users") {
-      sessionStorage.setItem("userID", data._id);
+      localStorage.setItem("userID", data._id);
       localStorage.setItem("aJWT", data.aJWT);
       localStorage.setItem("rJWT", data.rJWT);
       document.getElementById("auth-page").style.display = "none";
@@ -60,7 +60,7 @@ document
       body: JSON.stringify({
         accountname: accountName.value,
         balance: balance.value,
-        userID: sessionStorage.getItem("userID"),
+        userID: localStorage.getItem("userID"),
       }),
     });
     //  let data= res.json()
@@ -101,17 +101,45 @@ async function getNewToken() {
 
 // document.getElementById("submit-account").style.display = "none";
 export async function isLoggedIn() {
-  if (sessionStorage.getItem("userID")) {
+  console.log("isloggedin being called");
+  if (localStorage.getItem("userID")) {
+    console.log("user id exists ?");
     hideAll();
     document.getElementById("main").style.display = "inherit";
 
     let accounts = await makeRequest(() =>
-      getAccounts(sessionStorage.getItem("userID"))
+      getAccounts(localStorage.getItem("userID"))
     );
     renderAccounts(accounts);
   } else {
+    console.log("No user id ");
     hideAll();
     document.getElementById("auth-page").style.display = "inherit";
+  }
+}
+
+export async function logout() {
+  const aJWT = localStorage.getItem("aJWT");
+  try {
+    const res = await fetch(baseAPI + "users/logout", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${aJWT}`,
+      },
+    });
+    if (res.ok) {
+      console.log(res);
+
+      localStorage.removeItem("rJWT");
+      localStorage.removeItem("aJWT");
+      localStorage.removeItem("userID");
+      isLoggedIn();
+    } else {
+      data = await res.json();
+      console.log(data.message);
+    }
+  } catch (err) {
+    console.log(err);
   }
 }
 
@@ -196,8 +224,6 @@ async function accountButtonListeners(accountDiv, account) {
 
   //________________________Delete account________________________________
   saveDelete.addEventListener("click", async (e) => {
-
-
     let changed = await makeRequest(() => {
       return account.delete();
     });
