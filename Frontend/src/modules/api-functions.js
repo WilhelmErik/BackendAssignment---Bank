@@ -5,7 +5,6 @@ export async function authentication(target) {
   let endpoint = target == "login" ? "users/login" : "users";
 
   try {
-    // console.log(elements.Usernamet.value, elements.Pwet.value);
     let username = document.getElementById("username-input");
     let password = document.getElementById("password-input");
 
@@ -33,7 +32,6 @@ export async function authentication(target) {
       alert("account successfully created, please login");
     }
 
-    //  let usersID = sessionStorage.getItem("userID");
 
     console.log("Hello there");
     isLoggedIn();
@@ -63,14 +61,12 @@ document
         userID: localStorage.getItem("userID"),
       }),
     });
-    //  let data= res.json()
-    //  console.log(data)
+
     if (res.ok) isLoggedIn();
     console.log(res);
     let data = await res.json();
     console.log(data);
 
-    //   createAccount();
     document.getElementById("account-form").style.display = "none";
   });
 
