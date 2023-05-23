@@ -1,6 +1,7 @@
 const baseAPI = "http://localhost:3000/";
 const header = { "Content-Type": "application/json" };
 
+// An auth function that servers to both login and register depending on the argument rom the event listener
 export async function authentication(target) {
   let endpoint = target == "login" ? "users/login" : "users";
 
@@ -31,7 +32,6 @@ export async function authentication(target) {
     } else if (endpoint === "users") {
       alert("account successfully created, please login");
     }
-
 
     console.log("Hello there");
     isLoggedIn();
