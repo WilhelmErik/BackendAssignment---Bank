@@ -19,10 +19,14 @@ export async function authentication(target) {
     });
     let data = await response.json();
     console.log(data);
+    if (response.status == 400) {
+      alert(data.message + ": " + data.name);
+    }
     if (!response.ok) {
       throw new Error(`HTTP ERROR! Status: ${response.status} ping
       ${data.message} pong`);
     }
+
     if (endpoint !== "users") {
       localStorage.setItem("userID", data._id);
       localStorage.setItem("aJWT", data.aJWT);
@@ -179,7 +183,8 @@ function renderAccounts(accounts) {
     accountDiv.classList.add("account-div");
     // accountDiv.dataset.id = account._id;
     accountDiv.innerHTML = ` 
-    <h2>Account: ${account.name}</h2>
+    <h2>Account name: ${account.name}</h2>
+    <h2>Account number: ${account.id}</h2>
     <h3>Balance: ${account.balance} $</h3>
 
     <div class="account-buttons">

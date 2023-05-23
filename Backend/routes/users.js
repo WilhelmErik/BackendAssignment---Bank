@@ -62,7 +62,7 @@ userRouter.post("/login", async (req, res) => {
 //User logout
 userRouter.get("/logout", verifyAccessToken, async (req, res) => {
   const usersID = req.userId;
-  console.log("someone wants to logout")
+  console.log("someone wants to logout");
   try {
     await usersCollection.updateOne(
       { _id: usersID },
@@ -81,7 +81,7 @@ userRouter.post("/", async (req, res) => {
   if (user) {
     return res
       .status(400)
-      .json({ message: "Username already exists", something: username });
+      .json({ message: "Username already exists", name: username });
   }
 
   try {
