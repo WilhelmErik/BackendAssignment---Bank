@@ -19,6 +19,7 @@ export async function authentication(target) {
     });
     let data = await response.json();
     console.log(data);
+    // Will alert the message, which will be username exist since thats the only res error in the backend currently
     if (response.status == 400) {
       alert(data.message + ": " + data.name);
     }
@@ -26,7 +27,7 @@ export async function authentication(target) {
       throw new Error(`HTTP ERROR! Status: ${response.status} ping
       ${data.message} pong`);
     }
-
+    // If a user successfully logged in, not registered
     if (endpoint !== "users") {
       localStorage.setItem("userID", data._id);
       localStorage.setItem("aJWT", data.aJWT);
