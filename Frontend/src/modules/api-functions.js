@@ -74,7 +74,7 @@ document
 
     document.getElementById("account-form").style.display = "none";
   });
-
+// Function that will get called and retrieve and set a new token should the current access token be expired or not exist
 async function getNewToken() {
   const rJWT = localStorage.getItem("rJWT");
   console.log("Requesting a new token");
