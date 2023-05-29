@@ -322,6 +322,10 @@ class Account {
 
   async deposit(amount) {
     const aJWT = localStorage.getItem("aJWT");
+    if (+amount < 0) {
+      alert("You can't deposit a negative amount");
+      throw new Error("Fraudulent/Unallowed deposit");
+    }
     this.balance += +amount;
 
     try {
