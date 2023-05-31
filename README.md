@@ -1,7 +1,9 @@
 # Bank Application
 
 This project is a bank application built with JavaScript, Node.js, Express.js, MongoDB, dotenv, bcrypt, crypto, and JWT. It was created as a part of the coursework for my "JavaScript as a Backend Language" course.
-####Challenges
+
+#### Challenges
+
 One of the most time-consuming aspects of this project was implementing JWT, specifically the refresh and access tokens. I initially planned to implement simple JWT tokens, but decided to challenge myself by using a more secure and professional approach with refresh and access tokens.
 
 A notable challenge arose with the validation and renewal functions for the access tokens. Initially, the function to get a new access token was called with every request. Once this issue was fixed by checking status.ok, it still triggered on any potential error. I eventually solved this by implementing specific status codes sent from the backend, which could then be interpreted by the frontend.
