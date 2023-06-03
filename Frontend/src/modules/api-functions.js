@@ -1,6 +1,9 @@
 const baseAPI = "http://localhost:3000/";
 const header = { "Content-Type": "application/json" };
 
+// Testing github dev here 
+
+
 // An auth function that servers to both login and register depending on the argument rom the event listener
 export async function authentication(target) {
   let endpoint = target == "login" ? "users/login" : "users";
